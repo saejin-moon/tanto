@@ -13,7 +13,12 @@ fn main() {
     println!("{}", color.get_hex());
     // datetime
     let mut dt = DateTime::new();
+    dt.add(TimeUnit::Day, 6);
     println!("{}:{}:{} {}/{}/{}", dt.hour(), dt.minute(), dt.second(), dt.month(), dt.day(), dt.year());
-    dt.add(TimeUnit::Month, 2);
+    dt.add(TimeUnit::Day, 4).add(TimeUnit::Month, 5).add(TimeUnit::Year, 6);
+    // dt.add(TimeUnit::Second, 1).add(TimeUnit::Minute, 2).add(TimeUnit::Hour, 3).add(TimeUnit::Day, 4).add(TimeUnit::Month, 5).add(TimeUnit::Year, 6);
+    println!("{}:{}:{} {}/{}/{}", dt.hour(), dt.minute(), dt.second(), dt.month(), dt.day(), dt.year());
+    dt.add(TimeUnit::Day, -4).add(TimeUnit::Month, -5).add(TimeUnit::Year, -6);
+    // dt.add(TimeUnit::Second, -1).add(TimeUnit::Minute, -2).add(TimeUnit::Hour, -3).add(TimeUnit::Day, -4).add(TimeUnit::Month, -5).add(TimeUnit::Year, -6);
     println!("{}:{}:{} {}/{}/{}", dt.hour(), dt.minute(), dt.second(), dt.month(), dt.day(), dt.year());
 }

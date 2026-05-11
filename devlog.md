@@ -28,3 +28,5 @@
 - name change from tanteau to tanto
 ## oct 24, 2025
 - added getters and basics for addition and subtraction of `DateTime` impl. (unfinished)
+## oct 25, 2025
+- completed the `DateTime` impl

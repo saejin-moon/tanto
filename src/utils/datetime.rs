@@ -100,8 +100,8 @@ impl DateTime {
         // (day, month, year)
         (0, 0, 1970)
     }
-    
-    pub fn add(&mut self, unit: TimeUnit, val: u16) -> &mut Self {
+    /*
+    pub fn add(&mut self, unit: TimeUnit, val: i64) -> &mut Self {
         match unit {
             TimeUnit::Second => {
                 self.time += val as f64;
@@ -112,15 +112,14 @@ impl DateTime {
             TimeUnit::Hour => {
                 self.time += (val * 60 * 60) as f64;
             }
+            // i hate loathe deplore detest you.
+            // why couldn't self.time += (val * 60 * 60 * 24) as f64; have worked
             TimeUnit::Day => {
                 self.time += (val * 60 * 60 * 24) as f64;
             }
-            /* 
             // yuck yuck muck
             TimeUnit::Month => {
-                let mut month = val;
-
-                
+                let mut month = 0;
                 let mut days: [u16; 12] = [
                     31, // january
                     28, // february
@@ -135,45 +134,84 @@ impl DateTime {
                     30, // november
                     31  // december
                 ];
-                if self.is_leap(self.year()) {
-                    days[1] = 29; // leap year! again.
-                }
-                while month > 0 {
-                    let index = ((self.month() - 1) as u16 + month) % 12;
-                    self.time += days[index as usize] as f64 * 60. * 60. * 24.;
-                    month -= 1;
+                
+                let mut cache_year = 0;
+                while month < val.abs() {
+                    if cache_year != self.year() {
+                        days[1] = if self.is_leap(self.year()) { 29 } else if self.is_leap(cache_year) { 28 } else { 28 };
+                        cache_year = self.year();
+                    }
+                    //println!("1. (!)\t{}\t{}\t{}\t{}", self.month() as i16 % 12, if val.signum() < 0 { -1 } else { 0 }, self.month() as i16 % 12 + if val.signum() < 0 { -1 } else { 0 }, ((self.month() as i16 % 12 + if val.signum() < 0 { -1 } else { 0 }) % 12) as u16);
+                    let mut index = (self.month() % 12) as u16;
+                    if val.signum() < 0 {
+                        let mut temp = index as i16;
+                        temp -= 1;
+                        if temp < 0 {
+                            temp += 12;
+                        }
+                        index = temp as u16;
+                    }
+                    // println!("2. (@)\t{}\t{}\t{}\t{}", index, self.month(), days[index as usize], self.year());
+                    self.time += val.signum() as f64 * days[index as usize] as f64 * 60. * 60. * 24.;
+                    // println!("4. ($)\t{}\t{}\t{}\t{}", index, self.month(), days[index as usize], self.year());
+                    month += 1;
                 }
             }
             // less yuck but still muck
             TimeUnit::Year => {
-                
+                // self.add(TimeUnit::Month, val * 12);
+                let mut year = 0;
+                while year < val.abs() {
+                    println!("5. (%)\t{}\t{}\t{}\t{}\t{}", self.year(), self.is_leap(self.year()), year, self.day(), val.signum());
+                    self.time += val.signum() as f64 * (if self.is_leap(self.year()) { 366. * 60. * 60. * 24. } else { 365. * 60. * 60. * 24. });
+                    year += 1;
+                }
             }
-            */
         }
         self
     }
-    pub fn sub(&mut self, unit: TimeUnit, val: u128) -> &mut Self {
+    */
+    
+    pub fn add(&mut self, unit: TimeUnit, val: i64) -> &mut Self {
+        let val_f64 = val as f64;
+        let sign = val.signum() as f64;
+        
         match unit {
-            TimeUnit::Second => {
-                self.time -= val as f64;
-            }
-            TimeUnit::Minute => {
-                self.time -= (val * 60) as f64;
-            }
-            TimeUnit::Hour => {
-                self.time -= (val * 60 * 60) as f64;
-            }
-            TimeUnit::Day => {
-                self.time -= (val * 60 * 60 * 24) as f64;
-            }
-            /*
+            TimeUnit::Second => self.time += val_f64,
+            TimeUnit::Minute => self.time += val_f64 * 60.0,
+            TimeUnit::Hour => self.time += val_f64 * 3600.0,
+            TimeUnit::Day => self.time += val_f64 * 86400.0,
             TimeUnit::Month => {
-                // self.time -= (val * )
+                let mut month_counter = 0;
+                let days_in_months: [f64; 12] = [31.0, 28.0, 31.0, 30.0, 31.0, 30.0, 31.0, 31.0, 30.0, 31.0, 30.0, 31.0];
+                
+                while month_counter < val.abs() {
+                    let current_month_0_11 = (self.month() - 1) as usize;
+                    let mut year_check = self.year();
+                    let mut index_check = current_month_0_11;
+    
+                    if sign < 0.0 {
+                        if index_check == 0 {
+                            index_check = 11;
+                            year_check -= 1;
+                        } else {
+                            index_check -= 1;
+                        }
+                    }
+    
+                    let days = if index_check == 1 && self.is_leap(year_check) { 29.0 } else { days_in_months[index_check] };
+                    self.time += sign * days * 86400.0;
+                    month_counter += 1;
+                }
             }
             TimeUnit::Year => {
-                
+                let mut year_counter = 0;
+                while year_counter < val.abs() {
+                    let days = if self.is_leap(self.year()) { 366.0 } else { 365.0 };
+                    self.time += sign * days * 86400.0;
+                    year_counter += 1;
+                }
             }
-            */
         }
         self
     }
